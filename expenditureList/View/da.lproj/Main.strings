@@ -5,8 +5,8 @@
 /* Class = "UINavigationItem"; title = "Expenditures"; ObjectID = "kbM-be-JXF"; */
 "kbM-be-JXF.title" = "Udgifter";
 
-/* Class = "UISearchBar"; placeholder = "Search by name or email"; ObjectID = "pJc-QL-uVI"; */
-"pJc-QL-uVI.placeholder" = "Søg efter navn eller e-mail";
+/* Class = "UISearchBar"; placeholder = "Try: Lee or 2000 GBP or Pam 150 GBP"; ObjectID = "pJc-QL-uVI"; */
+"pJc-QL-uVI.placeholder" = "Prøv: Lee, 2000 GBP eller Pam 150 GBP";
 
 /* Class = "UILabel"; text = "Showing X-XX of XXX expenditures"; ObjectID = "wJo-3D-WEK"; */
 "wJo-3D-WEK.text" = "X-XX af XXX udgifter";

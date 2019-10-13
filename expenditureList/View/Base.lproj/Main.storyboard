@@ -18,12 +18,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <searchBar contentMode="redraw" placeholder="Search by name or email" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pJc-QL-uVI">
+                            <searchBar contentMode="redraw" placeholder="Try: Lee or 2000 GBP or Pam 150 GBP" translatesAutoresizingMaskIntoConstraints="NO" id="pJc-QL-uVI">
                                 <rect key="frame" x="0.0" y="116" width="375" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="h4j-eg-fFy"/>
                                 </constraints>
-                                <color key="barTintColor" red="0.36470588240000001" green="0.078431372550000003" blue="0.31764705879999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="barTintColor" red="0.95052386600000005" green="0.95052386600000005" blue="0.95052386600000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <textInputTraits key="textInputTraits" returnKeyType="done"/>
                             </searchBar>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="180" estimatedRowHeight="180" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="vpc-dk-peM">
@@ -113,10 +113,10 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" title="Expenditures" largeTitleDisplayMode="always" id="kbM-be-JXF">
-                        <barButtonItem key="rightBarButtonItem" systemItem="search" id="9La-YR-vTo">
+                        <barButtonItem key="rightBarButtonItem" largeContentSizeImage="Filter" systemItem="search" id="9La-YR-vTo">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
-                                <action selector="searchBarButtonItemPressed:" destination="BYZ-38-t0r" id="x4k-Lv-fl1"/>
+                                <action selector="filterBarButtonItemPressed:" destination="BYZ-38-t0r" id="x4k-Lv-fl1"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -156,4 +156,7 @@
             <point key="canvasLocation" x="296" y="72"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Filter" width="68" height="68"/>
+    </resources>
 </document>

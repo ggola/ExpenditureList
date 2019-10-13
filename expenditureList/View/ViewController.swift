@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     //MARK: - Search properties
-    private var isSearchActive = false
+    private var isFilterPanelOpen = false
     private var isFilteredExpenses: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     private var savedQuery = ""
     private var expensesAll = [Expenditure]()  // Used when filtering on client-side
@@ -60,8 +60,6 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationItem.title = LocalizedStrings.expendituresTitle
-        // This sets the cancel button color in the search bar white
-        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).setTitleTextAttributes([.foregroundColor: UIColor.white], for: .normal)
     }
     
     private func setupObjects() {
@@ -263,19 +261,19 @@ class ViewController: UIViewController {
     }
     
     //MARK: - IBActions
-    //Show/hide search bar
-    @IBAction func searchBarButtonItemPressed(_ sender: UIBarButtonItem) {
-        if !isSearchActive {
+    //Show/hide filters
+    @IBAction func filterBarButtonItemPressed(_ sender: UIBarButtonItem) {
+        if !isFilterPanelOpen {
             UIView.animate(withDuration: 0.2) {
                 self.tableViewTopConstraint.constant += self.searchBar.frame.height
                 self.view.layoutIfNeeded()
-                self.isSearchActive = true
+                self.isFilterPanelOpen = true
             }
         } else {
             UIView.animate(withDuration: 0.2) {
                 self.tableViewTopConstraint.constant -= self.searchBar.frame.height
                 self.view.layoutIfNeeded()
-                self.isSearchActive = false
+                self.isFilterPanelOpen = false
             }
         }
     }
@@ -351,12 +349,6 @@ extension ViewController: UISearchBarDelegate, UISearchControllerDelegate {
         searchBar.resignFirstResponder()
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.text = nil
-        isFilteredExpenses.accept(false)
-        reloadData(withLimit: self.expenditureLimit, andOffset: self.expenditureOffset)
-    }
-    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText == "" {
             // User has cleared the text with the X
@@ -364,7 +356,7 @@ extension ViewController: UISearchBarDelegate, UISearchControllerDelegate {
             reloadData(withLimit: self.expenditureLimit, andOffset: self.expenditureOffset)
         } else {
             NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.reload(_:)), object: searchBar)
-            perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.2)
+            perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.4)
         }
     }
 }
