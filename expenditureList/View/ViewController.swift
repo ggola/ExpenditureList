@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class ViewController: UIViewController {
     
@@ -21,14 +23,15 @@ class ViewController: UIViewController {
     private var expenditureShownCount = 0
     private var expenditureCount: Int?
     private var expenditureId: String?
-    private var expenses = [Expenditure]()
+    private var expenses: BehaviorRelay<[Expenditure]> = BehaviorRelay(value: [])
+    private let disposeBag = DisposeBag()
     
     //MARK: - Search properties
     private var isSearchActive = false
-    private var isFilteredExpenses = false
+    private var isFilteredExpenses: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     private var savedQuery = ""
     private var expensesAll = [Expenditure]()  // Used when filtering on client-side
-    private var expensesAllFiltered = [Expenditure]()
+    
     private var savedPartialLabelText = ""
     private var savedPrev25ButtonStatus = (isEnabled: false, alpha: 0.7)
     private var savedNext25ButtonStatus = (isEnabled: true, alpha: 1.0)
@@ -44,9 +47,25 @@ class ViewController: UIViewController {
     //MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupObjects()
+        // RX methods
+        setupClientFilteringObserver()
+        setupCellConfiguration()
+        setupCellTapHandling()
+        setupDelegate()
+        // Load data
+        let url = "\(YourBaseURL.baseURL)/expenses"
+        loadData(from: url)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.title = LocalizedStrings.expendituresTitle
+        // This sets the cancel button color in the search bar white
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).setTitleTextAttributes([.foregroundColor: UIColor.white], for: .normal)
+    }
+    
+    private func setupObjects() {
         // Table view
-        expensesTableView.dataSource = self
-        expensesTableView.delegate = self
         expensesTableView.register(UINib(nibName: "ExpenseTableViewCell", bundle: nil), forCellReuseIdentifier: "expenseCell")
         // Activity view
         activityView.center = self.view.center
@@ -58,14 +77,6 @@ class ViewController: UIViewController {
         imagePicker.allowsEditing = true
         // Search Bar
         searchBar.delegate = self
-        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).setTitleTextAttributes([.foregroundColor: UIColor.white], for: .normal)
-        // Load data
-        let url = "\(YourBaseURL.baseURL)/expenses"
-        loadData(from: url)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        self.navigationItem.title = LocalizedStrings.expendituresTitle
     }
     
     //MARK: - Data loading
@@ -75,28 +86,17 @@ class ViewController: UIViewController {
             DispatchQueue.main.async {
                 self.removeActivityIndicator()
             }
+            if let loadedExpenses = expenses {
+                self.expenses.accept(loadedExpenses)
+            }
+            // Set total number of expenses and load all data for client-side filtering
             if let totalExpenses = expensesTotalCount {
                 DispatchQueue.main.async {
                     self.updateLabels(withTotalExpenses: totalExpenses)
                 }
                 self.loadAllData(withTotalExpenses: totalExpenses)
             }
-            if let loadedExpenses = expenses {
-                // Update table view
-                self.expenses = loadedExpenses
-                if !self.isFilteredExpenses {
-                    DispatchQueue.main.async {
-                        self.expensesTableView.reloadData()
-                    }
-                }
-            }
         }
-    }
-    
-    private func reloadData(withLimit limit: Int, andOffset offset: Int) {
-        let url = "\(YourBaseURL.baseURL)/expenses?limit=\(limit)&offset=\(offset)"
-        expenses.removeAll()
-        loadData(from: url)
     }
     
     // Load all data. This is need when client filters data
@@ -105,14 +105,16 @@ class ViewController: UIViewController {
         networkingManager.getData(from: url) { (expensesTotalCount, expenses) in
             if let loadedExpenses = expenses {
                 self.expensesAll = loadedExpenses
-                if self.isFilteredExpenses {
-                    self.expensesAllFiltered = Expenditure.filterExpenses(from: self.expensesAll, withQuery: self.savedQuery)
-                    DispatchQueue.main.async {
-                        self.reloadExpenses(isFilteredData: true)
-                    }
-                }
+                // Call the RX to check if we are reloading filtered expenses
+                self.isFilteredExpenses.accept(self.isFilteredExpenses.value)
             }
         }
+    }
+    
+    private func reloadData(withLimit limit: Int, andOffset offset: Int) {
+        let url = "\(YourBaseURL.baseURL)/expenses?limit=\(limit)&offset=\(offset)"
+        expenses.accept([])
+        loadData(from: url)
     }
     
     //MARK: - Support methods
@@ -235,20 +237,13 @@ class ViewController: UIViewController {
     }
     
     //MARK: - Client-side filtering
-    // Reload original data after clearing search text and after new comment or receipts are added to the expenditure shown as filtered expenses.
-    private func reloadExpenses(isFilteredData: Bool) {
-        isFilteredExpenses = isFilteredData
-        updateLabelsAndButtonsDuringSearch()
-        expensesTableView.reloadData()
-    }
-    
     // Updates status of bottom labels when client starts filtering
-    private func updateLabelsAndButtonsDuringSearch() {
-        prev25Button.isEnabled = isFilteredExpenses ? false : savedPrev25ButtonStatus.isEnabled
-        prev25Button.alpha = isFilteredExpenses ? 0.7 : CGFloat(savedPrev25ButtonStatus.alpha)
-        next25Button.isEnabled = isFilteredExpenses ? false : savedNext25ButtonStatus.isEnabled
-        next25Button.alpha = isFilteredExpenses ? 0.7 : CGFloat(savedNext25ButtonStatus.alpha)
-        partialExpendituresLabel.text = isFilteredExpenses ? LocalizedStrings.filteredResults : savedPartialLabelText
+    private func updateLabelsAndButtons(forFiltering isFiltered: Bool) {
+        prev25Button.isEnabled = isFiltered ? false : savedPrev25ButtonStatus.isEnabled
+        prev25Button.alpha = isFiltered ? 0.7 : CGFloat(savedPrev25ButtonStatus.alpha)
+        next25Button.isEnabled = isFiltered ? false : savedNext25ButtonStatus.isEnabled
+        next25Button.alpha = isFiltered ? 0.7 : CGFloat(savedNext25ButtonStatus.alpha)
+        partialExpendituresLabel.text = isFiltered ? LocalizedStrings.filteredResults : savedPartialLabelText
     }
     
     // Saves bottom labels status to re-set it back to its value when client side filtering is over
@@ -262,14 +257,9 @@ class ViewController: UIViewController {
     
     // Reloads filtered results
     @objc private func reload(_ searchBar: UISearchBar) {
-        // Save partial label text only if client has not filtered expenses yet
-        if isFilteredExpenses == false {
-            saveCurrentButtonsAndLabelsStatus()
-        }
         guard let query = searchBar.text, query.trimmingCharacters(in: .whitespaces) != "" else { return }
         savedQuery = query
-        expensesAllFiltered = Expenditure.filterExpenses(from: expensesAll, withQuery: query)
-        reloadExpenses(isFilteredData: true)
+        isFilteredExpenses.accept(true)
     }
     
     //MARK: - IBActions
@@ -304,40 +294,11 @@ class ViewController: UIViewController {
     
 }
 
-//MARK: - Table View Data Source
-extension ViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return isFilteredExpenses ? expensesAllFiltered.count : expenses.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let expense = isFilteredExpenses ? expensesAllFiltered[indexPath.row] : expenses[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "expenseCell", for: indexPath) as! ExpenseTableViewCell
-        cell.setupCell(
-            index: expense.index + 1,
-            dateTime: expense.date,
-            merchantName: expense.merchant,
-            amountValue: expense.amount.value,
-            amountCurrency: expense.amount.currency,
-            numberOfReceipts: expense.receipts.count,
-            userFirst: expense.user.first,
-            userLast: expense.user.last,
-            userEmail: expense.user.email,
-            comment: expense.comment
-        )
-        return cell
-    }
-}
-
 //MARK: - Table View Delegates
 extension ViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-    }
-    
     // Swipe right to left to add comment and receipt
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        expenditureId = isFilteredExpenses ? self.expensesAllFiltered[indexPath.row].id : self.expenses[indexPath.row].id
+        expenditureId = expenses.value[indexPath.row].id
         // Add comment
         let addCommentAction = UIContextualAction(style: .normal, title:  "+") { (ac:UIContextualAction, view:UIView, success:(Bool) -> Void) in
             // Open alert controller with text field
@@ -392,17 +353,81 @@ extension ViewController: UISearchBarDelegate, UISearchControllerDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = nil
-        reloadExpenses(isFilteredData: false)
+        isFilteredExpenses.accept(false)
+        reloadData(withLimit: self.expenditureLimit, andOffset: self.expenditureOffset)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText == "" {
             // User has cleared the text with the X
-            reloadExpenses(isFilteredData: false)
+            isFilteredExpenses.accept(false)
+            reloadData(withLimit: self.expenditureLimit, andOffset: self.expenditureOffset)
         } else {
             NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.reload(_:)), object: searchBar)
-            perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.8)
+            perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.2)
         }
     }
+}
+
+//MARK: - Rx Setup
+private extension ViewController {
+    
+    func setupClientFilteringObserver() {
+        
+        isFilteredExpenses.asObservable().subscribe(onNext: { [unowned self] isFiltered in
+            if !isFiltered {
+                DispatchQueue.main.async {
+                    // Save partial label text only if client has not filtered expenses yet
+                    self.saveCurrentButtonsAndLabelsStatus()
+                }
+            }
+            // Update bottom labels and buttons
+            DispatchQueue.main.async {
+                self.updateLabelsAndButtons(forFiltering: isFiltered)
+            }
+            if isFiltered {
+                // If client is filtering, filter expenses with savedQuery
+                let loadedExpenses = Expenditure.filterExpenses(from: self.expensesAll, withQuery: self.savedQuery)
+                self.expenses.accept(loadedExpenses)
+            }
+        }).disposed(by: disposeBag)
+    }
+    
+    // Make Table view reactive
+    // Table view data source
+    private func setupCellConfiguration() {
+        expenses.bind(to: expensesTableView
+            .rx
+            .items(
+                cellIdentifier: "expenseCell",
+                cellType: ExpenseTableViewCell.self)) {
+                    row, item, cell in
+                    cell.setupCell(with: item)
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // Table view set delegate for swipe cell actions
+    private func setupDelegate() {
+        expensesTableView
+            .rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+    }
+    
+    // Table view delegate
+    private func setupCellTapHandling() {
+        expensesTableView
+            .rx
+            .modelSelected(Expenditure.self)
+            .subscribe(onNext: { [unowned self] item in
+                // Deselect the row
+                if let selectedRowIndexPath = self.expensesTableView.indexPathForSelectedRow {
+                    self.expensesTableView.deselectRow(at: selectedRowIndexPath, animated: false)
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
 }
 

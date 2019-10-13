@@ -35,15 +35,15 @@ class ExpenseTableViewCell: UITableViewCell {
         }
     }
     
-    func setupCell(index: Int, dateTime: String, merchantName: String, amountValue: String, amountCurrency: String, numberOfReceipts: Int, userFirst: String, userLast: String, userEmail: String, comment: String) {
-        self.indexLabel.text = String(index)
-        self.dateTimeLabel.text = getDateTime(from: dateTime)
-        self.merchantLabel.text = "\(merchantName)"
-        self.amountValueCurrencyLabel.text = "\(amountValue) \(amountCurrency)"
-        self.numberOfReceiptsLabel.text = numberOfReceipts == 0 ? LocalizedStrings.noReceipts : numberOfReceipts == 1 ? LocalizedStrings.oneReceipt : "\(numberOfReceipts) " + LocalizedStrings.receipts
-        self.userFirstLastLabel.text = "\(userFirst) \(userLast)"
-        self.userEmailLabel.text = userEmail
-        self.commentLabel.text = comment
+    func setupCell(with expense: Expenditure) {
+        self.indexLabel.text = String(expense.index + 1)
+        self.dateTimeLabel.text = getDateTime(from: expense.date)
+        self.merchantLabel.text = "\(expense.merchant)"
+        self.amountValueCurrencyLabel.text = "\(expense.amount.value) \(expense.amount.currency)"
+        self.numberOfReceiptsLabel.text = expense.receipts.count == 0 ? LocalizedStrings.noReceipts : expense.receipts.count == 1 ? LocalizedStrings.oneReceipt : "\(expense.receipts.count) " + LocalizedStrings.receipts
+        self.userFirstLastLabel.text = "\(expense.user.first) \(expense.user.last)"
+        self.userEmailLabel.text = expense.user.email
+        self.commentLabel.text = expense.comment
     }
     
     private func getDateTime(from dateTime: String) -> String {
