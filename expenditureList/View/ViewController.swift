@@ -26,6 +26,7 @@ class ViewController: UIViewController {
     //MARK: - Search properties
     private var isSearchActive = false
     private var isFilteredExpenses = false
+    private var savedQuery = ""
     private var expensesAll = [Expenditure]()  // Used when filtering on client-side
     private var expensesAllFiltered = [Expenditure]()
     private var savedPartialLabelText = ""
@@ -75,14 +76,18 @@ class ViewController: UIViewController {
                 self.removeActivityIndicator()
             }
             if let totalExpenses = expensesTotalCount {
-                self.updateLabels(withTotalExpenses: totalExpenses)
+                DispatchQueue.main.async {
+                    self.updateLabels(withTotalExpenses: totalExpenses)
+                }
                 self.loadAllData(withTotalExpenses: totalExpenses)
             }
             if let loadedExpenses = expenses {
                 // Update table view
                 self.expenses = loadedExpenses
-                DispatchQueue.main.async {
-                    self.expensesTableView.reloadData()
+                if !self.isFilteredExpenses {
+                    DispatchQueue.main.async {
+                        self.expensesTableView.reloadData()
+                    }
                 }
             }
         }
@@ -100,6 +105,12 @@ class ViewController: UIViewController {
         networkingManager.getData(from: url) { (expensesTotalCount, expenses) in
             if let loadedExpenses = expenses {
                 self.expensesAll = loadedExpenses
+                if self.isFilteredExpenses {
+                    self.expensesAllFiltered = Expenditure.filterExpenses(from: self.expensesAll, withQuery: self.savedQuery)
+                    DispatchQueue.main.async {
+                        self.reloadExpenses(isFilteredData: true)
+                    }
+                }
             }
         }
     }
@@ -107,14 +118,12 @@ class ViewController: UIViewController {
     //MARK: - Support methods
     private func updateLabels(withTotalExpenses totalExpenses: Int) {
         self.expenditureCount = totalExpenses
-        DispatchQueue.main.async {
-            if self.expenditureShownCount > totalExpenses {
-                self.partialExpendituresLabel.text = "\(self.expenditureOffset + 1)-\(totalExpenses) " + LocalizedStrings.of + " \(totalExpenses) " + LocalizedStrings.expenditures
-            } else {
-                self.partialExpendituresLabel.text = "\(self.expenditureOffset + 1)-\(self.expenditureShownCount) " + LocalizedStrings.of + " \(totalExpenses) " + LocalizedStrings.expenditures
-            }
-            self.updateButtons()
+        if self.expenditureShownCount > totalExpenses {
+            self.partialExpendituresLabel.text = "\(self.expenditureOffset + 1)-\(totalExpenses) " + LocalizedStrings.of + " \(totalExpenses) " + LocalizedStrings.expenditures
+        } else {
+            self.partialExpendituresLabel.text = "\(self.expenditureOffset + 1)-\(self.expenditureShownCount) " + LocalizedStrings.of + " \(totalExpenses) " + LocalizedStrings.expenditures
         }
+        self.updateButtons()
     }
     
     private func updateButtons() {
@@ -134,7 +143,8 @@ class ViewController: UIViewController {
         activityView.stopAnimating()
     }
     
-    //MARK: - Add comment
+    //MARK: - Add comment and receipt
+    // Add comment
     private func addComment() {
         var textField = UITextField()
         let alert = UIAlertController(title: LocalizedStrings.addComment, message: nil, preferredStyle: .alert)
@@ -154,7 +164,7 @@ class ViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    //Post comment
+    // Post comment
     private func postComment(withText comment: String) {
         if let id = expenditureId {
             // Post comment to API
@@ -165,23 +175,7 @@ class ViewController: UIViewController {
         }
     }
     
-    private func showSuccessAlert(for object: String) {
-        let alert = UIAlertController(title: object + " " + LocalizedStrings.added, message: nil, preferredStyle: .alert)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            alert.dismiss(animated: true, completion: nil)
-        }
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    private func showFailAlert() {
-        let alert = UIAlertController(title: LocalizedStrings.errorAdding, message: nil, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: LocalizedStrings.retry, style: .default, handler: { (action) in
-            alert.dismiss(animated: true, completion: nil)
-        }))
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    //MARK: - Add receipt
+    // Add receipt
     private func addReceipt() {
         let alert = UIAlertController(title: LocalizedStrings.addReceiptFrom, message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: LocalizedStrings.camera, style: .default, handler: { (action) in
@@ -223,14 +217,32 @@ class ViewController: UIViewController {
         }
     }
     
-    //MARK: - Search bar methods
-    // Reload original data after clearing search text
-    private func reloadExpenses(forFilteredData filtered: Bool) {
-        isFilteredExpenses = filtered
+    // Success and fail alerts
+    private func showSuccessAlert(for object: String) {
+        let alert = UIAlertController(title: object + " " + LocalizedStrings.added, message: nil, preferredStyle: .alert)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            alert.dismiss(animated: true, completion: nil)
+        }
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private func showFailAlert() {
+        let alert = UIAlertController(title: LocalizedStrings.errorAdding, message: nil, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: LocalizedStrings.retry, style: .default, handler: { (action) in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK: - Client-side filtering
+    // Reload original data after clearing search text and after new comment or receipts are added to the expenditure shown as filtered expenses.
+    private func reloadExpenses(isFilteredData: Bool) {
+        isFilteredExpenses = isFilteredData
         updateLabelsAndButtonsDuringSearch()
         expensesTableView.reloadData()
     }
     
+    // Updates status of bottom labels when client starts filtering
     private func updateLabelsAndButtonsDuringSearch() {
         prev25Button.isEnabled = isFilteredExpenses ? false : savedPrev25ButtonStatus.isEnabled
         prev25Button.alpha = isFilteredExpenses ? 0.7 : CGFloat(savedPrev25ButtonStatus.alpha)
@@ -239,6 +251,7 @@ class ViewController: UIViewController {
         partialExpendituresLabel.text = isFilteredExpenses ? LocalizedStrings.filteredResults : savedPartialLabelText
     }
     
+    // Saves bottom labels status to re-set it back to its value when client side filtering is over
     private func saveCurrentButtonsAndLabelsStatus() {
         savedPartialLabelText = partialExpendituresLabel.text!
         savedPrev25ButtonStatus.isEnabled = prev25Button.isEnabled
@@ -247,21 +260,16 @@ class ViewController: UIViewController {
         savedNext25ButtonStatus.alpha = Double(next25Button.alpha)
     }
     
-    // Reload search bar results only afterDelay.
+    // Reloads filtered results
     @objc private func reload(_ searchBar: UISearchBar) {
         // Save partial label text only if client has not filtered expenses yet
         if isFilteredExpenses == false {
             saveCurrentButtonsAndLabelsStatus()
         }
         guard let query = searchBar.text, query.trimmingCharacters(in: .whitespaces) != "" else { return }
-        var filteredExpenses = [Expenditure]()
-        filteredExpenses = expensesAll.filter({ (element) -> Bool in
-            let expense = element as Expenditure
-            // Filter data: check if user first, last and email contain client query
-            return expense.user.first.contains(query) || expense.user.last.contains(query) || expense.user.email.contains(query)
-        })
-        expensesAllFiltered = filteredExpenses
-        reloadExpenses(forFilteredData: true)
+        savedQuery = query
+        expensesAllFiltered = Expenditure.filterExpenses(from: expensesAll, withQuery: query)
+        reloadExpenses(isFilteredData: true)
     }
     
     //MARK: - IBActions
@@ -384,13 +392,13 @@ extension ViewController: UISearchBarDelegate, UISearchControllerDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = nil
-        reloadExpenses(forFilteredData: false)
+        reloadExpenses(isFilteredData: false)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText == "" {
             // User has cleared the text with the X
-            reloadExpenses(forFilteredData: false)
+            reloadExpenses(isFilteredData: false)
         } else {
             NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.reload(_:)), object: searchBar)
             perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.8)

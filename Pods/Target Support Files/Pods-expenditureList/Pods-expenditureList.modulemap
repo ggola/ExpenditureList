@@ -1,0 +1,6 @@
+framework module Pods_expenditureList {
+  umbrella header "Pods-expenditureList-umbrella.h"
+
+  export *
+  module * { export * }
+}

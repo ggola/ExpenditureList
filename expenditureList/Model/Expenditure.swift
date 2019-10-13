@@ -20,6 +20,14 @@ struct Expenditure {
     var user: ExpenditureUser
     var index: Int = 0
     
-
-    
+    // Filter expenses
+    static func filterExpenses(from expensesAll: [Expenditure], withQuery query: String) -> [Expenditure] {
+        var filteredExpenses = [Expenditure]()
+        filteredExpenses = expensesAll.filter({ (element) -> Bool in
+            let expense = element as Expenditure
+            // Filter data: check if user first, last and email contain client query
+            return expense.user.first.contains(query) || expense.user.last.contains(query) || expense.user.email.contains(query)
+        })
+        return filteredExpenses
+    }
 }
