@@ -1,0 +1,15 @@
+
+/* Class = "UIButton"; normalTitle = "Next 25"; ObjectID = "SCc-E5-qTr"; */
+"SCc-E5-qTr.normalTitle" = "Næste 25";
+
+/* Class = "UINavigationItem"; title = "Expenditures"; ObjectID = "kbM-be-JXF"; */
+"kbM-be-JXF.title" = "Udgifter";
+
+/* Class = "UISearchBar"; placeholder = "Search by name or email"; ObjectID = "pJc-QL-uVI"; */
+"pJc-QL-uVI.placeholder" = "Søg efter navn eller e-mail";
+
+/* Class = "UILabel"; text = "Showing X-XX of XXX expenditures"; ObjectID = "wJo-3D-WEK"; */
+"wJo-3D-WEK.text" = "X-XX af XXX udgifter";
+
+/* Class = "UIButton"; normalTitle = "Prev 25"; ObjectID = "yoT-Wt-FNc"; */
+"yoT-Wt-FNc.normalTitle" = "Tidl 25";

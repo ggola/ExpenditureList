@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="eji-Bl-Z2y">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Expenditures-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="expenditureList" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" placeholder="Search by name or email" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pJc-QL-uVI">
+                                <rect key="frame" x="0.0" y="116" width="375" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="h4j-eg-fFy"/>
+                                </constraints>
+                                <color key="barTintColor" red="0.36470588240000001" green="0.078431372550000003" blue="0.31764705879999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="180" estimatedRowHeight="180" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="vpc-dk-peM">
+                                <rect key="frame" x="0.0" y="116" width="375" height="487"/>
+                                <color key="backgroundColor" red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </tableView>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DhM-an-hx3" userLabel="Bottom Stack">
+                                <rect key="frame" x="16" y="616" width="343" height="40"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="bEP-Vt-aEl" userLabel="Bottom Labels Stack">
+                                        <rect key="frame" x="0.0" y="0.0" width="197" height="40"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="X-XX of XXX expenditures" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wJo-3D-WEK">
+                                                <rect key="frame" x="0.0" y="0.0" width="176.5" height="40"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="40" id="EnO-BP-sZS"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                                <color key="textColor" red="0.1508962563" green="0.1508962563" blue="0.1508962563" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="wNE-fv-61M" userLabel="Bottom Buttons Stack">
+                                        <rect key="frame" x="197" y="0.0" width="146" height="40"/>
+                                        <subviews>
+                                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yoT-Wt-FNc">
+                                                <rect key="frame" x="0.0" y="0.0" width="69" height="40"/>
+                                                <color key="backgroundColor" red="0.36470588240000001" green="0.078431372550000003" blue="0.31764705879999999" alpha="1" colorSpace="calibratedRGB"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="40" id="7w2-Tz-8Bp"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                                <state key="normal" title="Prev 25">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="8"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                                <connections>
+                                                    <action selector="prev25ButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3Vb-ul-pRb"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SCc-E5-qTr">
+                                                <rect key="frame" x="77" y="0.0" width="69" height="40"/>
+                                                <color key="backgroundColor" red="0.36470588240000001" green="0.078431372550000003" blue="0.31764705879999999" alpha="1" colorSpace="calibratedRGB"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="40" id="QWm-F3-vtt"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                                <state key="normal" title="Next 25">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="8"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                                <connections>
+                                                    <action selector="next25ButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="YlD-9d-ZZQ"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="146" id="Ylb-4v-UIK"/>
+                                            <constraint firstAttribute="height" constant="40" id="tcp-7I-6Lh"/>
+                                        </constraints>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="pJc-QL-uVI" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="2Dt-Hr-FF8"/>
+                            <constraint firstItem="vpc-dk-peM" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="2TO-Qf-Z8U"/>
+                            <constraint firstItem="vpc-dk-peM" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="LmB-tB-GLH"/>
+                            <constraint firstItem="pJc-QL-uVI" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Mrd-AA-C8P"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="DhM-an-hx3" secondAttribute="trailing" constant="16" id="OUj-mB-rnf"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="DhM-an-hx3" secondAttribute="bottom" constant="11" id="dxE-lc-Yjx"/>
+                            <constraint firstItem="vpc-dk-peM" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="jGg-od-Xkd"/>
+                            <constraint firstItem="DhM-an-hx3" firstAttribute="top" secondItem="vpc-dk-peM" secondAttribute="bottom" constant="13" id="qiw-dY-soM"/>
+                            <constraint firstItem="DhM-an-hx3" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="slR-vX-Zvj"/>
+                            <constraint firstItem="pJc-QL-uVI" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="z7l-tR-abB"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Expenditures" largeTitleDisplayMode="always" id="kbM-be-JXF">
+                        <barButtonItem key="rightBarButtonItem" systemItem="search" id="9La-YR-vTo">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="searchBarButtonItemPressed:" destination="BYZ-38-t0r" id="x4k-Lv-fl1"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="expensesTableView" destination="vpc-dk-peM" id="vQr-Mw-A13"/>
+                        <outlet property="next25Button" destination="SCc-E5-qTr" id="aPi-ei-Jg0"/>
+                        <outlet property="partialExpendituresLabel" destination="wJo-3D-WEK" id="2Nj-GI-2LY"/>
+                        <outlet property="prev25Button" destination="yoT-Wt-FNc" id="Bwg-UW-PvU"/>
+                        <outlet property="searchBar" destination="pJc-QL-uVI" id="scx-Rs-DZX"/>
+                        <outlet property="tableViewTopConstraint" destination="LmB-tB-GLH" id="Igc-yh-RHn"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1050.4000000000001" y="71.514242878560722"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="7tJ-Fl-sNM">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="eji-Bl-Z2y" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="Ze6-Hb-t03">
+                        <rect key="frame" x="0.0" y="20" width="375" height="96"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" red="0.36470588240000001" green="0.078431372550000003" blue="0.31764705879999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <textAttributes key="largeTitleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </textAttributes>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="QwK-vA-gEK"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RUw-FD-PSF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="296" y="72"/>
+        </scene>
+    </scenes>
+</document>
