@@ -20,9 +20,22 @@ struct Expenditure {
     var user: ExpenditureUser
     var index: Int = 0
     
+    
     // Filter expenses
     static func filterExpenses(from expensesAll: [Expenditure], withQuery query: String) -> [Expenditure] {
         let queryArray = query.components(separatedBy: " ")
+        //Find what the query contains
+        let queryContent: (isNameOrEmailInQuery: Bool, isNumberInQuery: Bool, isCurrencyInQuery: Bool) = findWhatQueryContains(withQueryArray: queryArray)
+        var filteredExpenses = [Expenditure]()
+        filteredExpenses = expensesAll.filter({ (element) -> Bool in
+            let expense = element as Expenditure
+            let queryMatches: (isFirstName: Bool, isLastName: Bool, isEmail: Bool, isMinAmount: Bool, isCurrency: Bool) = getQueryMatches(withQueryArray: queryArray, andExpense: expense)
+            return isInFilteredExpenses(givenContent: queryContent, andMatches: queryMatches)
+        })
+        return filteredExpenses
+    }
+    
+    static private func findWhatQueryContains(withQueryArray queryArray: [String]) -> (Bool, Bool, Bool) {
         //Find what the query contains
         var isNumberInQuery = false
         var isNameOrEmailInQuery = false
@@ -36,65 +49,72 @@ struct Expenditure {
                 isNameOrEmailInQuery = true
             }
         }
+        return (isNameOrEmailInQuery, isNumberInQuery, isCurrencyInQuery)
+    }
+    
+    
+    static private func getQueryMatches(withQueryArray queryArray: [String], andExpense expense: Expenditure) -> (Bool, Bool, Bool, Bool, Bool){
+        var queryMatches = (isFirstName: false, isLastName: false, isEmail: false, isMinAmount: false, isCurrency: false)
         
-        var filteredExpenses = [Expenditure]()
-        filteredExpenses = expensesAll.filter({ (element) -> Bool in
-            
-            var isFirstName = false
-            var isLastName = false
-            var isEmail = false
-            var isMinAmount = false
-            var isCurrency = false
-            
-            let expense = element as Expenditure
-
-            for q in queryArray {
-                if let minAmount = Double(q) {
-                    if Double(expense.amount.value)! >= minAmount {
-                        isMinAmount = true
-                    }
-                } else if expense.user.first.contains(q) {
-                    isFirstName = true
-                } else if expense.user.last.contains(q) {
-                    isLastName = true
-                } else if expense.user.email.contains(q) {
-                    isEmail = true
-                } else if expense.amount.currency == q {
-                    isCurrency = true
+        for q in queryArray {
+            if let minAmount = Double(q) {
+                if Double(expense.amount.value)! >= minAmount {
+                    queryMatches.isMinAmount = true
                 }
+            } else if expense.user.first.contains(q) {
+                queryMatches.isFirstName = true
+            } else if expense.user.last.contains(q) {
+                queryMatches.isLastName = true
+            } else if expense.user.email.contains(q) {
+                queryMatches.isEmail = true
+            } else if expense.amount.currency == q {
+                queryMatches.isCurrency = true
             }
-            
-            if isNameOrEmailInQuery {
-                if isNumberInQuery {
-                    if isCurrencyInQuery {
-                        return (isFirstName || isLastName || isEmail) && isMinAmount && isCurrency
-                    } else {
-                        return (isFirstName || isLastName || isEmail) && isMinAmount
-                    }
+        }
+        return queryMatches
+    }
+    
+    
+    static private func isInFilteredExpenses(givenContent queryContent: (Bool, Bool, Bool), andMatches queryMatches: (Bool, Bool, Bool, Bool, Bool)) -> Bool {
+        
+        let isNameOrEmailInQuery = queryContent.0
+        let isNumberInQuery = queryContent.1
+        let isCurrencyInQuery = queryContent.2
+        let isFirstName = queryMatches.0
+        let isLastName = queryMatches.1
+        let isEmail = queryMatches.2
+        let isMinAmount = queryMatches.3
+        let isCurrency = queryMatches.4
+        
+        if isNameOrEmailInQuery {
+            if isNumberInQuery {
+                if isCurrencyInQuery {
+                    return (isFirstName || isLastName || isEmail) && isMinAmount && isCurrency
                 } else {
-                    if isCurrencyInQuery {
-                        return (isFirstName || isLastName || isEmail) && isCurrency
-                    } else {
-                        return (isFirstName || isLastName || isEmail)
-                    }
+                    return (isFirstName || isLastName || isEmail) && isMinAmount
                 }
             } else {
-                if isNumberInQuery {
-                    if isCurrencyInQuery {
-                        return isMinAmount && isCurrency
-                    } else {
-                        return isMinAmount
-                    }
+                if isCurrencyInQuery {
+                    return (isFirstName || isLastName || isEmail) && isCurrency
                 } else {
-                    if isCurrencyInQuery {
-                        return isCurrency
-                    } else {
-                        return false
-                    }
+                    return (isFirstName || isLastName || isEmail)
                 }
             }
-           
-        })
-        return filteredExpenses
+        } else {
+            if isNumberInQuery {
+                if isCurrencyInQuery {
+                    return isMinAmount && isCurrency
+                } else {
+                    return isMinAmount
+                }
+            } else {
+                if isCurrencyInQuery {
+                    return isCurrency
+                } else {
+                    return false
+                }
+            }
+        }
     }
+    
 }
