@@ -41,12 +41,15 @@ struct Expenditure {
         var isNameOrEmailInQuery = false
         var isCurrencyInQuery = false
         for q in queryArray {
-            if Double(q) != nil {
-                isNumberInQuery = true
-            } else if q == "GBP" || q == "EUR" || q == "DKK" {
-                isCurrencyInQuery = true
-            } else {
-                isNameOrEmailInQuery = true
+            let Q = q.uppercased()
+            if !q.isEmpty {
+                if Double(q) != nil {
+                    isNumberInQuery = true
+                } else if Q == "GBP" || Q == "EUR" || Q == "DKK" {
+                    isCurrencyInQuery = true
+                } else {
+                    isNameOrEmailInQuery = true
+                }
             }
         }
         return (isNameOrEmailInQuery, isNumberInQuery, isCurrencyInQuery)
@@ -57,6 +60,7 @@ struct Expenditure {
         var queryMatches = (isFirstName: false, isLastName: false, isEmail: false, isMinAmount: false, isCurrency: false)
         
         for q in queryArray {
+            let Q = q.uppercased()
             if let minAmount = Double(q) {
                 if Double(expense.amount.value)! >= minAmount {
                     queryMatches.isMinAmount = true
@@ -67,7 +71,7 @@ struct Expenditure {
                 queryMatches.isLastName = true
             } else if expense.user.email.contains(q) {
                 queryMatches.isEmail = true
-            } else if expense.amount.currency == q {
+            } else if expense.amount.currency == Q {
                 queryMatches.isCurrency = true
             }
         }

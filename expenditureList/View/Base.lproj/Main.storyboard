@@ -37,8 +37,9 @@
                                         <rect key="frame" x="0.0" y="0.0" width="197" height="40"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="X-XX of XXX expenditures" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wJo-3D-WEK">
-                                                <rect key="frame" x="0.0" y="0.0" width="176.5" height="40"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="160" height="40"/>
                                                 <constraints>
+                                                    <constraint firstAttribute="width" constant="160" id="AgT-MF-FVu"/>
                                                     <constraint firstAttribute="height" constant="40" id="EnO-BP-sZS"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
